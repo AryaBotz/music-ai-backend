@@ -1,41 +1,30 @@
+let state = {
+  playlist: null,
+  index: 0,
+  updatedAt: null
+};
 
-let currentPlaylist = null;
-let currentIndex = 0;
-
-// SET playlist baru
-function setPlaylist(playlist) {
-  currentPlaylist = playlist;
-  currentIndex = 0;
+function setPlaylist(p) {
+  state.playlist = p;
+  state.index = 0;
+  state.updatedAt = Date.now();
 }
 
-// ambil track sekarang
-function getCurrentTrack() {
-  if (!currentPlaylist) return null;
-  return currentPlaylist.tracks[currentIndex];
+function getCurrent() {
+  if (!state.playlist) return null;
+  return state.playlist.tracks[state.index];
 }
 
-// next track
-function nextTrack() {
-  if (!currentPlaylist) return null;
+function next() {
+  if (!state.playlist) return null;
 
-  currentIndex++;
+  state.index++;
 
-  if (currentIndex >= currentPlaylist.tracks.length) {
-    currentIndex = 0;
+  if (state.index >= state.playlist.tracks.length) {
+    state.index = 0;
   }
 
-  return getCurrentTrack();
+  return getCurrent();
 }
 
-// optional: reset
-function reset() {
-  currentPlaylist = null;
-  currentIndex = 0;
-}
-
-module.exports = {
-  setPlaylist,
-  getCurrentTrack,
-  nextTrack,
-  reset
-};
+module.exports = { setPlaylist, getCurrent, next };
