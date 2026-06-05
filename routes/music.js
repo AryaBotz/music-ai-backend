@@ -16,28 +16,34 @@ router.post("/play", async (req, res) => {
     const { text } = req.body;
 
     if (!text) {
-      return res.status(400).json({ error: "text required" });
+      return res.status(400).json({
+        ok: false,
+        error: "text required"
+      });
     }
 
-    // 1. AI parse mood
+    // 1. AI parsing (Groq)
     const intent = await parseMood(text);
 
     // 2. build playlist from mood
     const playlist = await buildPlaylist(intent.mood);
 
-    // 3. SAVE STATE (INI PENTING)
+    // 3. save state
     playlistState.setPlaylist(playlist);
 
-    // 4. return response
     res.json({
+      ok: true,
       input: text,
-      intent,
-      playlist
+      intent: intent,
+      playlistSize: playlist?.tracks?.length || 0
     });
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "server error" });
+    res.status(500).json({
+      ok: false,
+      error: "server error"
+    });
   }
 });
 
@@ -45,38 +51,54 @@ router.post("/play", async (req, res) => {
 /**
  * =========================
  * GET /music/current
- * ambil lagu sekarang
+ * return current track (JSON CLEAN)
  * =========================
  */
 router.get("/current", (req, res) => {
-  const track = playlistState.getCurrentTrack();
+  const track = playlistState.getCurrent();
 
   if (!track) {
     return res.status(404).json({
-      error: "no active playlist"
+      ok: false,
+      error: "no playlist"
     });
   }
 
-  res.json(track);
+  res.json({
+    ok: true,
+    track: {
+      title: track.title,
+      artist: track.artist,
+      url: track.url
+    }
+  });
 });
 
 
 /**
  * =========================
  * GET /music/next
- * pindah ke lagu berikutnya
+ * move index + return next track
  * =========================
  */
 router.get("/next", (req, res) => {
-  const track = playlistState.nextTrack();
+  const track = playlistState.next();
 
   if (!track) {
     return res.status(404).json({
-      error: "no active playlist"
+      ok: false,
+      error: "no playlist"
     });
   }
 
-  res.json(track);
+  res.json({
+    ok: true,
+    track: {
+      title: track.title,
+      artist: track.artist,
+      url: track.url
+    }
+  });
 });
 
 module.exports = router;
