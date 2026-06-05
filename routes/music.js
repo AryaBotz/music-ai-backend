@@ -22,24 +22,33 @@ router.post("/play", async (req, res) => {
       });
     }
 
-    // 1. AI parsing (Groq)
+    // 1. AI parsing (Groq / rule-based fallback)
     const intent = await parseMood(text);
 
-    // 2. build playlist from mood
+    // 2. build playlist berdasarkan mood
     const playlist = await buildPlaylist(intent.mood);
 
-    // 3. save state
-    playlistState.setPlaylist(playlist);
+    // 3. ambil tracks aman
+    const tracks = playlist?.tracks || [];
 
+    // 4. simpan ke state (untuk /current & /next)
+    playlistState.setPlaylist(tracks);
+
+    // DEBUG (penting untuk Railway logs)
+    console.log("MOOD:", intent.mood);
+    console.log("TRACKS:", JSON.stringify(tracks, null, 2));
+
+    // 5. response ke ESP32 (INI FIX UTAMA)
     res.json({
       ok: true,
       input: text,
       intent: intent,
-      playlistSize: playlist?.tracks?.length || 0
+      tracks: tracks,
+      playlistSize: tracks.length
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("PLAY ERROR:", err);
     res.status(500).json({
       ok: false,
       error: "server error"
@@ -47,11 +56,9 @@ router.post("/play", async (req, res) => {
   }
 });
 
-
 /**
  * =========================
  * GET /music/current
- * return current track (JSON CLEAN)
  * =========================
  */
 router.get("/current", (req, res) => {
@@ -66,19 +73,13 @@ router.get("/current", (req, res) => {
 
   res.json({
     ok: true,
-    track: {
-      title: track.title,
-      artist: track.artist,
-      url: track.url
-    }
+    track
   });
 });
-
 
 /**
  * =========================
  * GET /music/next
- * move index + return next track
  * =========================
  */
 router.get("/next", (req, res) => {
@@ -93,11 +94,7 @@ router.get("/next", (req, res) => {
 
   res.json({
     ok: true,
-    track: {
-      title: track.title,
-      artist: track.artist,
-      url: track.url
-    }
+    track
   });
 });
 
