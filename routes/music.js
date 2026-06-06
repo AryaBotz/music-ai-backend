@@ -27,7 +27,7 @@ router.post("/play", async (req, res) => {
 
     // 2. build playlist berdasarkan mood
     const playlist =
-  await buildPlaylist(intent.mood);
+  await buildPlaylist(intent.musicMood);
 
     // 3. ambil tracks aman
     const tracks = playlist?.tracks || [];
@@ -36,7 +36,7 @@ router.post("/play", async (req, res) => {
     playlistState.setPlaylist(tracks);
 
     // DEBUG (penting untuk Railway logs)
-    console.log("MOOD:", intent.mood);
+    console.log("MOOD:", intent.musicMood);
     console.log("TRACKS:", JSON.stringify(tracks, null, 2));
 
     // 5. response ke ESP32 (INI FIX UTAMA)
