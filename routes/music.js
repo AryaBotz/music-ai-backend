@@ -26,7 +26,8 @@ router.post("/play", async (req, res) => {
     const intent = await parseMood(text);
 
     // 2. build playlist berdasarkan mood
-    const playlist = await buildPlaylist(intent.mood);
+    const playlist =
+  await buildPlaylist(intent.musicMood);
 
     // 3. ambil tracks aman
     const tracks = playlist?.tracks || [];
