@@ -1,18 +1,70 @@
-const moodMap = require("../utils/moodMap");
-const { searchTracks } = require("./jamendo");
+let state = {
+  playlist: [],
+  index: 0
+};
 
-async function buildPlaylist(mood) {
-  const genres = moodMap[mood] || ["pop"];
+function setPlaylist(tracks = []) {
+  state.playlist = Array.isArray(tracks)
+    ? tracks
+    : [];
 
-  const tag = genres[0];
+  state.index = 0;
 
-  const tracks = await searchTracks(tag);
-
-  return {
-    mood,
-    tag,
-    tracks
-  };
+  console.log(
+    "Playlist loaded:",
+    state.playlist.length
+  );
 }
 
-module.exports = { buildPlaylist };
+function getCurrent() {
+  if (state.playlist.length === 0) {
+    return null;
+  }
+
+  return state.playlist[state.index];
+}
+
+function next() {
+  if (state.playlist.length === 0) {
+    return null;
+  }
+
+  state.index++;
+
+  if (state.index >= state.playlist.length) {
+    state.index = 0;
+  }
+
+  return state.playlist[state.index];
+}
+
+function previous() {
+  if (state.playlist.length === 0) {
+    return null;
+  }
+
+  state.index--;
+
+  if (state.index < 0) {
+    state.index = state.playlist.length - 1;
+  }
+
+  return state.playlist[state.index];
+}
+
+function getPlaylist() {
+  return state.playlist;
+}
+
+function getIndex() {
+  return state.index;
+}
+
+module.exports = {
+  setPlaylist,
+  getCurrent,
+  next,
+  previous,
+  getPlaylist,
+  getIndex
+};
