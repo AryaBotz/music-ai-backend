@@ -7,22 +7,22 @@ async function searchTracks(tag) {
       params: {
         client_id: process.env.JAMENDO_CLIENT_ID,
         format: "json",
-        limit: 1,
+        limit: 5,
         tags: tag,
         audioformat: "mp32"
       }
     }
   );
 
-  console.log(
-    JSON.stringify(
-      res.data.results[0],
-      null,
-      2
-    )
-  );
+  const tracks = res.data.results.map(t => ({
+    title: t.name,
+    artist: t.artist_name,
+    url: t.audio
+  }));
 
-  return [];
+  console.log("TRACKS BUILT:", tracks.length);
+
+  return tracks;
 }
 
 module.exports = { searchTracks };
